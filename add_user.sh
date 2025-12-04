@@ -12,18 +12,16 @@ USERNAME="$1"
 EMAIL="${USERNAME}@${SERVER_DOMAIN}"
 
 # Check if the user already exists
-if grep -q "\"email\": \"$EMAIL\"" "$CONFIG"; then
+if grep -q "\"email\": \"$EMAIL\"" "$CONFIG_FILE"; then
     echo "User with email $EMAIL already exists!"
     exit 1
 fi
 
 # Generate UUID
-UUID=$(openssl rand -hex 16 | sed 's/\(..\)/\1-/4' | sed 's/-/-4/' | sed 's/-[89ab]/a/' | cut -c1-36 | sed 's/-$//')
+UUID=$(cat /proc/sys/kernel/random/uuid)
 
 echo "Creating client: $EMAIL"
 echo "UUID: $UUID"
-
-mkdir -p "$USERS_DIR"
 
 # Create temporary file with JSON block
 TMP="/tmp/newclient.tmp"
@@ -38,7 +36,7 @@ cat > "$TMP" <<EOF
 EOF
 
 # Insert the block after the "clients": [ line
-sed -i "/\"clients\": \[/r $TMP" "$CONFIG"
+sed -i "/\"clients\": \[/r $TMP" "$CONFIG_FILE"
 
 rm "$TMP"
 

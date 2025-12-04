@@ -2,14 +2,12 @@
 
 source settings.conf
 
+
 # Check if first user provided
 if [ -z "$1" ]; then
     echo "Usage: $0 user"
     exit 1
 fi
-
-# Path to xray folder
-XRAY_DIR="xray"
 
 # Check if directory exists
 if [ ! -d "$XRAY_DIR" ]; then
@@ -17,40 +15,31 @@ if [ ! -d "$XRAY_DIR" ]; then
     exit 1
 fi
 
-cd "$XRAY_DIR" || exit 1
 
 # Replace example.com with user domain in config.json
-if [ -f "config.json" ]; then
-    sed -i "s/example\.com/$SERVER_DOMAIN/g" config.json
-    echo "Updated config.json with domain $SERVER_DOMAIN"
+if [ -f "$XRAY_DIR/config.json" ]; then
+    sed -i "s/example\.com/$SERVER_DOMAIN/g" $XRAY_DIR/config.json
+    echo "Updated $XRAY_DIR/config.json with domain $SERVER_DOMAIN"
 else
-    echo "config.json not found!"
+    echo "$XRAY_DIR/config.json not found!"
 fi
 
 # Replace example.com with user domain in Caddyfile
-if [ -f "Caddyfile" ]; then
-    sed -i "s/example\.com/$SERVER_DOMAIN/g" Caddyfile
-    echo "Updated Caddyfile with domain $SERVER_DOMAIN"
+if [ -f "$XRAY_DIR/Caddyfile" ]; then
+    sed -i "s/example\.com/$SERVER_DOMAIN/g" $XRAY_DIR/Caddyfile
+    echo "Updated $XRAY_DIR/Caddyfile with domain $SERVER_DOMAIN"
 else
-    echo "Caddyfile not found!"
+    echo "$XRAY_DIR/Caddyfile not found!"
 fi
 
 USERNAME="$1"
 EMAIL="${USERNAME}@${SERVER_DOMAIN}"
 
-# Check if the user already exists
-if grep -q "\"email\": \"$EMAIL\"" "$CONFIG"; then
-    echo "User with email $EMAIL already exists!"
-    exit 1
-fi
-
 # Generate UUID
-UUID=$(openssl rand -hex 16 | sed 's/\(..\)/\1-/4' | sed 's/-/-4/' | sed 's/-[89ab]/a/' | cut -c1-36 | sed 's/-$//')
+UUID=$(cat /proc/sys/kernel/random/uuid)
 
 echo "Creating client: $EMAIL"
 echo "UUID: $UUID"
-
-mkdir -p "$USERS_DIR"
 
 # Create temporary file with JSON block
 TMP="/tmp/newclient.tmp"
@@ -65,7 +54,7 @@ cat > "$TMP" <<EOF
 EOF
 
 # Insert the block after the "clients": [ line
-sed -i "/\"clients\": \[/r $TMP" "$CONFIG"
+sed -i "/\"clients\": \[/r $TMP" "$CONFIG_FILE"
 
 rm "$TMP"
 
