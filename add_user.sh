@@ -54,10 +54,10 @@ echo "Created file $USER_CONF"
 echo
 qrencode -t ANSIUTF8 "$VLESS_URL"
 
-# Restart docker container xray
+# Restart docker container xray_caddy
 cd $XRAY_DIR
 docker restart xray
 
-# Show xray logs
+# Show xray_caddy logs
 sleep 3
 docker logs -n 10 xray

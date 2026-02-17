@@ -1,4 +1,4 @@
-# wormhole_pub
+# wormhall
 ## Описание
 В данном репозитории содержится пример настройки xray/vless в среде docker. 
 

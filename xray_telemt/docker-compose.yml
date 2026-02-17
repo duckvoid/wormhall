@@ -1,0 +1,42 @@
+services:
+  xray:
+    image: teddysun/xray
+    container_name: xray
+    volumes:
+      - ./config.json:/etc/xray/config.json
+    restart: unless-stopped
+    networks:
+      xray-net:
+        ipv4_address: 172.100.100.100 # прибиваем ip. Telemt не умеет ходить по DNS
+
+  v2ray-exporter:
+    image: wi1dcard/v2ray-exporter:master
+    container_name: v2ray-exporter
+    command:
+      - "--v2ray-endpoint=xray:8080"
+    ports:
+      - "127.0.0.1:9550:9550"
+    depends_on:
+      - xray
+    networks:
+      - xray-net
+
+  telemt:
+    image: whn0thacked/telemt-docker:latest
+    container_name: telemt
+    restart: unless-stopped
+    networks:
+      - xray-net
+    volumes:
+      - ./telemt.toml:/etc/telemt.toml:ro
+    ports:
+      - "18443:443/tcp"
+      - "127.0.0.1:9092:9090/tcp"
+
+
+networks:
+  xray-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.100.100.0/24

@@ -1,0 +1,87 @@
+{
+  "log": {
+    "loglevel": "debug"
+  },
+  "dns": {
+    "servers": [
+      "https+local://1.1.1.1/dns-query",
+      "localhost"
+    ]
+  },
+  "stats": {},
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserUplink": true,
+        "statsUserDownlink": true,
+        "statsInboundUplink": true,
+        "statsInboundDownlink": true
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
+  "api": {
+    "tag": "api",
+    "listen": "0.0.0.0:8080",
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService",
+      "RoutingService"
+    ]
+  },
+  "metrics": {
+    "tag": "Metrics",
+    "listen": "127.0.0.1:11111"
+  },
+  "routing": {
+    "rules":[
+      {
+        "type": "field",
+        "inboundTag": ["socks-in"],
+        "outboundTag": "to-abyss"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "socks-in",
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": false
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "to-freedom",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "ip",
+            "port": 11111,
+            "users": [
+              {
+                "id": "key1",
+                "email": "user1",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "none"
+      }
+    }
+  ]
+}

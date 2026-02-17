@@ -1,0 +1,38 @@
+show_link = ["user1", "user2", "user3"] #нужно для печати строки подключения при старте
+
+[general]
+prefer_ipv6 = false
+fast_mode = true
+use_middle_proxy = true
+log_level = "debug"
+
+[general.modes]
+classic = false
+secure = false
+tls = true
+
+[server]
+port = 443
+listen_addr_ipv4 = "0.0.0.0"
+listen_addr_ipv6 = "::"
+metrics_port = 9090 # не работает
+#metrics_whitelist = ["127.0.0.1", "::1"]
+
+[censorship]
+tls_domain = "www.cloudflare.com"
+mask = false
+mask_port = 443
+
+[access]
+replay_check_len = 65536
+ignore_time_skew = false
+
+[access.users]
+user1 = "qwertyuioasdfghjkzxcvbnm" # генерим через "openssl rand -hex 16"
+user2 = "qwertyuioasdfghjklzxcvbn"
+user3 = "qwertyuiasdfghjklzxcvbnm"
+
+[[upstreams]]
+type = "socks5"
+enabled = true
+address = "172.100.100.100:1080"

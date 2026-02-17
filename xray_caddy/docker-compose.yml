@@ -1,11 +1,11 @@
 services:
   xray:
     image: teddysun/xray
-    container_name: xray
+    container_name: xray_caddy
     ports:
       - "443:443"
     volumes:
-      - ./config.json:/etc/xray/config.json
+      - ./config.json:/etc/xray_caddy/config.json
       - caddy_data:/caddy_data
     restart: unless-stopped
     depends_on:
@@ -24,6 +24,18 @@ services:
       - ./stub:/srv/stub
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - xray-net
+      -
+  v2ray-exporter:
+    image: wi1dcard/v2ray-exporter:master
+    container_name: v2ray-exporter
+    command:
+      - "--v2ray-endpoint=xray_caddy:8080"
+    ports:
+      - "9550:9550"
+    depends_on:
+      - xray
     networks:
       - xray-net
 
