@@ -1,4 +1,19 @@
 services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+      - ./stub:/srv/stub # путь до директории с заглушкой
+    networks:
+      xray-net:
+        ipv4_address: 172.100.100.101 # Прибиваем ip. Telemt не умеет резолвить адрес прокси
+
   xray:
     image: teddysun/xray
     container_name: xray
@@ -7,7 +22,7 @@ services:
     restart: unless-stopped
     networks:
       xray-net:
-        ipv4_address: 172.100.100.100 # прибиваем ip. Telemt не умеет ходить по DNS
+        ipv4_address: 172.100.100.100
 
   v2ray-exporter:
     image: wi1dcard/v2ray-exporter:master
@@ -15,7 +30,7 @@ services:
     command:
       - "--v2ray-endpoint=xray:8080"
     ports:
-      - "127.0.0.1:9550:9550"
+      - "9550:9550"
     depends_on:
       - xray
     networks:
@@ -27,12 +42,22 @@ services:
     restart: unless-stopped
     networks:
       - xray-net
+    cap_add:
+      - NET_ADMIN
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      RUST_LOG: "info"
     volumes:
+      - ./telemt_data:/etc/telemt
       - ./telemt.toml:/etc/telemt.toml:ro
     ports:
-      - "18443:443/tcp"
-      - "127.0.0.1:9092:9090/tcp"
-
+      - "443:443/tcp"
+      - "100.64.64.5:9092:9090/tcp"
+    extra_hosts:
+      - "<domain>:172.100.100.101"
 
 networks:
   xray-net:

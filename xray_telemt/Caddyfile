@@ -1,0 +1,12 @@
+<DOMAIN> {
+}
+
+:8443 {
+
+   tls internal {
+	on_demand
+   }
+
+    root * /srv/stub
+    file_server
+}

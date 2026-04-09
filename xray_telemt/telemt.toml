@@ -3,8 +3,12 @@ show_link = ["user1", "user2", "user3"] #нужно для печати стро
 [general]
 prefer_ipv6 = false
 fast_mode = true
-use_middle_proxy = true
-log_level = "debug"
+use_middle_proxy = false #must disabled for xray socks upstream since telemt v3
+log_level = "normal"
+
+[general.links]
+public_host = "<DOMAIN>"
+public_port = 443
 
 [general.modes]
 classic = false
@@ -15,13 +19,21 @@ tls = true
 port = 443
 listen_addr_ipv4 = "0.0.0.0"
 listen_addr_ipv6 = "::"
-metrics_port = 9090 # не работает
-#metrics_whitelist = ["127.0.0.1", "::1"]
+metrics_port = 9090
+metrics_whitelist = ["0.0.0.0/0"]
 
 [censorship]
-tls_domain = "www.cloudflare.com"
-mask = false
-mask_port = 443
+tls_domain = "<DOMAIN>"
+mask = true
+mask_port = 8443
+mask_ipv4 = "172.100.100.101"
+tls_emulation = true
+server_hello_delay_max_ms = 200
+tls_fetch_scope = "fetch"
+
+[timeouts]
+client_handshake = 10
+client_keepalive = 600
 
 [access]
 replay_check_len = 65536
@@ -33,6 +45,11 @@ user2 = "qwertyuioasdfghjklzxcvbn"
 user3 = "qwertyuiasdfghjklzxcvbnm"
 
 [[upstreams]]
+type = "direct"
+scopes = "fetch"
+
+[[upstreams]]
 type = "socks5"
 enabled = true
+weight = 1
 address = "172.100.100.100:1080"
