@@ -1,0 +1,37 @@
+services:
+  haproxy:
+    image: haproxy:alpine
+    container_name: haproxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - xray-net
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./stub:/srv/stub
+    networks:
+      xray-net:
+        ipv4_address: 172.100.100.101
+    depends_on:
+      - haproxy
+
+
+networks:
+  xray-net:
+    external: true
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:

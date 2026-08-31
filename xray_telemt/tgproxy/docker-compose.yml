@@ -1,0 +1,47 @@
+services:
+  telemt:
+    image: ghcr.io/telemt/telemt:3.4.23 #та версия, на которой у меня сейчас все работает
+    container_name: telemt
+    restart: unless-stopped
+    command: [ "/etc/telemt/telemt.toml" ]
+    networks:
+      xray-net:
+        ipv4_address: 172.100.100.102
+    working_dir: /run/telemt
+
+    tmpfs:
+      - /run/telemt:rw,mode=1777,size=4m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    environment:
+      RUST_LOG: "info"
+    volumes:
+      - ./telemt_data:/etc/telemt
+      - ./telemt.toml:/etc/telemt/telemt.toml:ro
+    ports:
+      - "1.1.1.1:1111:1111/tcp" #your ip and ports for metrics
+    extra_hosts:
+      - "my.domain.local:172.100.100.101" #your domain
+    healthcheck:
+      test: [ "CMD", "/app/telemt", "healthcheck", "/etc/telemt/telemt.toml", "--mode", "liveness" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+networks:
+  xray-net:
+    external: true

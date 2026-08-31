@@ -1,0 +1,7 @@
+# Заменить на свои данные
+my.domain.local{
+    tls my@domain.local
+
+    root * /srv/stub
+    file_server
+}

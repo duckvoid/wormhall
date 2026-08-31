@@ -1,6 +1,8 @@
 {
   "log": {
-    "loglevel": "debug"
+    "loglevel": "debug",
+    "access": "/var/log/xray/access.log",
+    "error": "/var/log/xray/error.log"
   },
   "dns": {
     "servers": [
@@ -43,8 +45,11 @@
     "rules":[
       {
         "type": "field",
-        "inboundTag": ["socks-in"],
-        "outboundTag": "to-abyss"
+        "inboundTag": [
+          "socks-in",
+          "https-in"
+        ],
+        "outboundTag": "to-main-proxy"
       }
     ]
   },
@@ -61,17 +66,17 @@
   ],
   "outbounds": [
     {
-      "tag": "to-freedom",
+      "tag": "to-main-proxy",
       "protocol": "vless",
       "settings": {
         "vnext": [
           {
-            "address": "ip",
-            "port": 11111,
+            "address": "1.1.1.1",
+            "port": 1111,
             "users": [
               {
-                "id": "key1",
-                "email": "user1",
+                "id": "key",
+                "email": "user@domain.local",
                 "encryption": "none"
               }
             ]

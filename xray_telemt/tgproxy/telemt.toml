@@ -1,0 +1,70 @@
+show_link = ["user1", "user2", "user3"]
+
+[general]
+prefer_ipv6 = false
+fast_mode = true
+use_middle_proxy = false
+log_level = "normal"
+tg_connect = 30
+
+[general.links]
+public_host = "my.domain.local" # your public domain
+public_port = 443
+
+[general.modes]
+classic = false
+secure = false
+tls = true
+
+[server]
+port = 443
+listen_addr_ipv4 = "0.0.0.0"
+listen_addr_ipv6 = "::"
+metrics_listen = "0.0.0.0:9090"
+metrics_whitelist = ["0.0.0.0/0"]
+client_mss = "tspu"
+client_mss_bulk = "1400"
+
+[censorship]
+tls_domain = "my.domain.local"
+tls_emulation = true
+tls_full_cert_ttl_secs = 90
+tls_front_dir = "/var/lib/telemt/tlsfront"
+tls_fetch_scope = ""
+mask = true
+mask_port = 443
+mask_host = "172.100.100.101"
+server_hello_delay_min_ms = 100
+server_hello_delay_max_ms = 240
+unknown_sni_action = "reject_handshake"
+
+[timeouts]
+client_first_byte_idle_secs = 300
+client_handshake = 120
+client_keepalive = 90
+client_ack = 90
+relay_idle_policy_v2_enabled = true
+relay_client_idle_soft_secs = 180
+relay_client_idle_hard_secs = 600
+relay_idle_grace_after_downstream_activity_secs = 60
+
+[access]
+replay_check_len = 65536
+ignore_time_skew = false
+
+[access.users]
+user1 = "key1"
+user2 = "key2"
+user3 = "key3"
+
+[[upstreams]]
+type = "direct"
+scopes = "fetch"
+
+
+# на локальный xray по docker сети
+[[upstreams]]
+type = "socks5"
+enabled = true
+weight = 1
+address = "172.100.100.100:1080"
