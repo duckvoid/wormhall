@@ -1,0 +1,92 @@
+show_link = ["user1", "user2", "user3", "user4"]
+
+[general]
+fast_mode = true
+use_middle_proxy = false
+log_level = "normal"
+tg_connect = 30
+
+[network]
+prefer = 4
+
+[server.api]
+enabled = true
+listen = "0.0.0.0:9091"
+whitelist = ["0.0.0.0/0"] # 
+read_only = true
+
+
+[[server.listeners]]
+ip = "0.0.0.0"
+port = 443
+transport = "web"
+proxy_protocol = false
+web_client_ip_source = "x_forwarded_for"
+web_trusted_proxy_cidrs = ["172.100.100.0/24"]
+
+
+[access.users]
+user1 = "key1"
+user2 = "key2"
+user3 = "key3"
+user4 = "key4"
+
+[[upstreams]]
+type = "direct"
+scopes = "fetch"
+
+# на локальный xray по docker сети
+[[upstreams]]
+type = "socks5"
+enabled = true
+weight = 1
+address = "172.100.100.100:1080"
+
+
+[web]
+enabled = true
+carrier = "https"
+carriers = ["websocket-lanes", "websocket", "https-lanes", "https"]
+carrier_learning = true
+decoy_fasttrack_mode = "enforce"
+http_connection_capacity_action = "drop"
+
+[web.timeouts]
+carrier_negotiation_deadlines_secs = [3, 5, 8, 12]
+carrier_health_secs = 30
+carrier_learning_secs = 600
+bridge_request_secs = 10
+bridge_retry_secs = 90
+bridge_recovery_secs = 15
+carrier_probe_coalesce_ms = 0
+
+[web.debug]
+enabled = true
+capture_lifecycle = true
+capture_headers = true
+body_capture = "metadata"
+
+[[web.vhosts]]
+host = "my.domain.local"
+public_addr = "<you.real.ip>"
+
+[web.vhosts.decoy]
+mode = "static_directory"
+directory = "/srv/stub"
+index = "index.html"
+
+[[web.vhosts.profiles]]
+user = "user1"
+secret_mode = "dd"
+
+[[web.vhosts.profiles]]
+user = "user2"
+secret_mode = "dd"
+
+[[web.vhosts.profiles]]
+user = "user3"
+secret_mode = "dd"
+
+[[web.vhosts.profiles]]
+user = "user4"
+secret_mode = "dd"

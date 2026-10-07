@@ -1,0 +1,32 @@
+# на глобальном уровне ограничиваем h3 и говорим доверять подсети, которую используем в докере
+{
+    servers :443 {
+        protocols h1 h2
+        listener_wrappers {
+            proxy_protocol {
+                timeout 2s
+                allow 172.100.100.0/24
+            }
+            tls
+        }
+    }
+
+    servers :80 {
+        protocols h1 h2
+        listener_wrappers {
+            proxy_protocol {
+                timeout 2s
+                allow 172.100.100.0/24
+            }
+        }
+    }
+}
+
+# Заменить на свои данные
+my.domain.local{
+    reverse_proxy 172.100.100.103:443 {
+        header_up X-Forwarded-For {remote_host} # передаем реальный ip клиента, а не ip caddy
+        flush_interval -1
+        stream_close_delay 5m
+    }
+}

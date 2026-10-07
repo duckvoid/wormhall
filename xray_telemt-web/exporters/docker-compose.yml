@@ -1,0 +1,44 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    network_mode: "host"
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--web.listen-address=1.1.1.1:1111' #your ip and port
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    group_add:
+      - "990"
+    ports:
+      - "1.1.1.1:1111:1111" #your ip and port
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:rw
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    command:
+      - --docker_only=true
+      - --store_container_labels=true
+      - --whitelisted_container_labels=.*
+      
+  fail2ban_exporter:
+    container_name: fail2ban_exporter
+    image: registry.gitlab.com/hctrdev/fail2ban-prometheus-exporter:latest
+    volumes:
+      - /var/run/fail2ban/:/var/run/fail2ban:ro
+    ports:
+      - "1.1.1.1:1111" #your ip and port
